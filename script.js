@@ -61,9 +61,6 @@ function createResourceCard(resource) {
                 ${resource.serviceScope}
             </p>
 
-            <a href="${resource.website}">
-                Visit Website
-            </a>
         </div>
     `;
 }
