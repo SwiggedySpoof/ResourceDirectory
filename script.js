@@ -1,28 +1,13 @@
 ﻿let dataLoaded = false;
 
-const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTvqHir6yYMKMmiAwA8a1JgWcliwhHqKyM31eQPcse-Nq6qJyRz6" +
-    "3PQPg-bkyfWrbfiIVYcVVicrljy/pub?gid=1699150383&single=true&output=csv";
+const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTvqHir6yYMKMmiAwA8a1JgWcliwhHqKyM31eQPc" +
+    "se-Nq6qJyRz63PQPg-bkyfWrbfiIVYcVVicrljy/pub?output=tsv";
 
 let resources = [];
 
 const searchBox = document.getElementById("searchBox");
 const categoryFilter = document.getElementById("categoryFilter");
 
-function parseCSVRow(row) {
-    const result = [];
-    let current = "";
-    let inQuotes = false;
-
-    for (const char of row) {
-        if (char === '"') {
-            inQuotes = !inQuotes;
-        } else if (char === "," && !inQuotes) {
-            result.push(current.trim());
-            current = "";
-        } else {
-            current += char;
-        }
-    }
     result.push(current.trim());
     return result;
 }
@@ -106,20 +91,20 @@ displayResources(resources);
 
 fetch(sheetUrl)
     .then(response => response.text())
-    .then(csvText => {
+    .then(tsvText => {
 
-        const rows = csvText
+        const rows = tsvText
             .split("\n")
             .map(r => r.trim())
             .filter(r => r.length > 0);
 
-        const headers = parseCSVRow(rows[0]);
+        const headers = rows[0].split("\t")
 
         resources = [];
 
         for (let i = 1; i < rows.length; i++) {
 
-            const values = parseCSVRow(rows[i]);
+            const values = rows[i].split("\t");
             const rowObj = {};
 
             for (let j = 0; j < headers.length; j++) {
@@ -153,5 +138,5 @@ fetch(sheetUrl)
 
         displayResources(resources);
         dataLoaded = true;
-    })           // ← closes .then(csvText => { ... })
+    })
 
