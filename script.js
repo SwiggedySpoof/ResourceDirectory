@@ -24,51 +24,69 @@ function parseTSVRow(row) {
     return result;
 }
 
-function createResourceCard(resource) {
+function createResourceCard(resource, query) {
     return `
         <div>
-            <h3>${resource.agencyName}</h3>
+            <h3>${highlightText(resource.agencyName, query)}</h3>
 
             <p>
                 <strong>Category:</strong>
-                ${resource.category}
+                ${highlightText(resource.category, query)}
             </p>
 
             <p>
                 <strong>Serves:</strong>
-                ${resource.cityCountyServed}
+                ${highlightText(resource.cityCountyServed, query)}
             </p>
 
             <p>
                 <strong>Phone:</strong>
-                ${resource.phoneNumber}
+                ${highlightText(resource.phoneNumber, query)}
             </p>
 
             <p>
                 <strong>Address:</strong>
-                ${resource.streetAddress}
+                ${highlightText(resource.streetAddress, query)}
             </p>
 
             <p>
                 <strong>Hours:</strong>
-                ${resource.officeHours}
+                ${highlightText(resource.officeHours, query)}
             </p>
 
             <p>
-                ${resource.serviceScope}
+                ${highlightText(resource.serviceScope, query)}
             </p>
+
+            ${resource.website ? `
+            <p>
+                <strong>Website:</strong>
+                <a href="${formatUrl(resource.website)}" target="_blank" rel="noopener noreferrer">
+                    ${highlightText(resource.website, query)}
+                </a>
+            </p>
+            ` : ""}
 
         </div>
     `;
 }
 
-function displayResources(resourceList) {
+function formatUrl(url) {
+    const trimmed = url.trim();
+    if (!trimmed) return "#";
+    if (/^https?:\/\//i.test(trimmed)) {
+        return trimmed;
+    }
+    return "https://" + trimmed;
+}
+
+function displayResources(resourceList, query = "") {
     const container = document.getElementById("resourceContainer");
 
     let html = "";
 
     for (const resource of resourceList) {
-        html += createResourceCard(resource);
+        html += createResourceCard(resource, query);
     }
 
     container.innerHTML = html;
@@ -90,10 +108,21 @@ searchBox.addEventListener("input", function () {
             (resource.searchIndex || "").includes(searchText)
         );
 
-        displayResources(filteredResources);
+        displayResources(filteredResources, searchBox.value);
 
     }, 120);
 });
+
+function escapeRegExp(str) {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function highlightText(text, query) {
+    if (!query) return text;
+    const safeQuery = escapeRegExp(query);
+    const regex = new RegExp(`(${safeQuery})`, "gi");
+    return String(text).replace(regex, "<mark>$1</mark>");
+}
 
 const container = document.getElementById("resourceContainer");
 
